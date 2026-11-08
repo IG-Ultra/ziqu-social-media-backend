@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Ziqu FastAPI Backend Server
+  api:
+    build: .
+    container_name: ziqu_backend_api
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://ziqu_admin:ziqu_password@postgres:5432/ziqu_db
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET_KEY=ziqu_production_super_secret_key_2025
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+
+  # PostgreSQL Relational Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: ziqu_postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: ziqu_admin
+      POSTGRES_PASSWORD: ziqu_password
+      POSTGRES_DB: ziqu_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ziqu_admin -d ziqu_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis for Feed Caching & Realtime PubSub
+  redis:
+    image: redis:7-alpine
+    container_name: ziqu_redis_cache
+    restart: always
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
