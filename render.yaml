@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: ziqu-backend
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1 --proxy-headers --forwarded-allow-ips='*'
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ACCESS_TOKEN_EXPIRE_DAYS
+        value: "30"
+    # Optional Persistent Disk (requires Render Starter/Standard paid instance):
+    # Mounts /var/data so SQLite DB & uploaded media persist across deploys/restarts.
+    # If you upgrade from Free plan, uncomment below and add RENDER_DISK_PATH=/var/data:
+    # disk:
+    #   name: ziqu-data
+    #   mountPath: /var/data
+    #   sizeGB: 1
