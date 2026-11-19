@@ -1,1 +1,0 @@
-web: uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1 --backlog 2048 --limit-concurrency 2500 --timeout-keep-alive 30 --ws websockets --ws-ping-interval 25 --ws-ping-timeout 25 --proxy-headers --forwarded-allow-ips='*'
