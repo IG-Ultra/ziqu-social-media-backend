@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: ziqu-backend
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1 --backlog 2048 --limit-concurrency 2500 --timeout-keep-alive 30 --ws auto --ws-ping-interval 25 --ws-ping-timeout 25 --proxy-headers --forwarded-allow-ips='*'
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ACCESS_TOKEN_EXPIRE_DAYS
+        value: "30"
+      # Set your permanent PostgreSQL URL (e.g. from Neon.tech, Supabase, or Render Postgres)
+      # in Render Dashboard -> Environment so user accounts, posts, & chats NEVER wipe on restart:
+      - key: DATABASE_URL
+        sync: false
+      # Optional permanent image/video CDN hosting (cloudinary.com free tier):
+      - key: CLOUDINARY_URL
+        sync: false
+    # Optional Persistent Disk (requires Render Starter/Standard paid instance):
+    # Mounts /var/data if not using external PostgreSQL + Cloudinary.
+    # disk:
+    #   name: ziqu-data
+    #   mountPath: /var/data
+    #   sizeGB: 1
