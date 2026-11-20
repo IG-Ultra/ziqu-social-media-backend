@@ -993,6 +993,7 @@ _POSTGRES_SCHEMA_STATEMENTS = [
 
 
 _POSTGRES_ADDITIVE_COLUMNS = [
+    ("users", "uid", "TEXT DEFAULT ''"),
     ("users", "username", "TEXT DEFAULT ''"),
     ("users", "username_lower", "TEXT DEFAULT ''"),
     ("users", "email", "TEXT DEFAULT ''"),
@@ -1007,6 +1008,7 @@ _POSTGRES_ADDITIVE_COLUMNS = [
     ("users", "is_verified", "INTEGER DEFAULT 0"),
     ("users", "is_admin", "INTEGER DEFAULT 0"),
     ("users", "is_banned", "INTEGER DEFAULT 0"),
+    ("password_resets", "id", "TEXT DEFAULT ''"),
     ("password_resets", "uid", "TEXT DEFAULT ''"),
     ("password_resets", "email", "TEXT DEFAULT ''"),
     ("password_resets", "reset_code", "TEXT DEFAULT ''"),
@@ -1015,6 +1017,7 @@ _POSTGRES_ADDITIVE_COLUMNS = [
     ("password_resets", "created_at", "BIGINT DEFAULT 0"),
     ("password_resets", "expires_at", "BIGINT DEFAULT 0"),
     ("password_resets", "used", "INTEGER DEFAULT 0"),
+    ("posts", "post_id", "TEXT DEFAULT ''"),
     ("posts", "user_id", "TEXT DEFAULT ''"),
     ("posts", "username", "TEXT DEFAULT ''"),
     ("posts", "user_profile_image", "TEXT DEFAULT ''"),
@@ -1034,8 +1037,13 @@ _POSTGRES_ADDITIVE_COLUMNS = [
     ("posts", "rewatch_count", "BIGINT DEFAULT 0"),
     ("posts", "is_reel", "INTEGER DEFAULT 0"),
     ("posts", "is_verified", "INTEGER DEFAULT 0"),
+    ("likes", "post_id", "TEXT DEFAULT ''"),
+    ("likes", "user_id", "TEXT DEFAULT ''"),
     ("likes", "timestamp", "BIGINT DEFAULT 0"),
+    ("saved_posts", "post_id", "TEXT DEFAULT ''"),
+    ("saved_posts", "user_id", "TEXT DEFAULT ''"),
     ("saved_posts", "saved_at", "BIGINT DEFAULT 0"),
+    ("comments", "comment_id", "TEXT DEFAULT ''"),
     ("comments", "post_id", "TEXT DEFAULT ''"),
     ("comments", "user_id", "TEXT DEFAULT ''"),
     ("comments", "username", "TEXT DEFAULT ''"),
@@ -1047,7 +1055,10 @@ _POSTGRES_ADDITIVE_COLUMNS = [
     ("comments", "replied_to_user_id", "TEXT DEFAULT ''"),
     ("comments", "replied_to_username", "TEXT DEFAULT ''"),
     ("comments", "is_verified", "INTEGER DEFAULT 0"),
+    ("follows", "follower_uid", "TEXT DEFAULT ''"),
+    ("follows", "following_uid", "TEXT DEFAULT ''"),
     ("follows", "timestamp", "BIGINT DEFAULT 0"),
+    ("stories", "story_id", "TEXT DEFAULT ''"),
     ("stories", "user_id", "TEXT DEFAULT ''"),
     ("stories", "username", "TEXT DEFAULT ''"),
     ("stories", "user_profile_image", "TEXT DEFAULT ''"),
@@ -1065,15 +1076,21 @@ _POSTGRES_ADDITIVE_COLUMNS = [
     ("stories", "text_color", "TEXT DEFAULT '#FFFFFF'"),
     ("stories", "text_scale", "DOUBLE PRECISION DEFAULT 1.0"),
     ("stories", "text_rotation", "DOUBLE PRECISION DEFAULT 0.0"),
+    ("story_viewers", "story_id", "TEXT DEFAULT ''"),
+    ("story_viewers", "viewer_uid", "TEXT DEFAULT ''"),
     ("story_viewers", "timestamp", "BIGINT DEFAULT 0"),
+    ("story_reactions", "story_id", "TEXT DEFAULT ''"),
+    ("story_reactions", "reactor_uid", "TEXT DEFAULT ''"),
     ("story_reactions", "reactor_username", "TEXT DEFAULT ''"),
     ("story_reactions", "reactor_profile_image", "TEXT DEFAULT ''"),
     ("story_reactions", "emoji", "TEXT DEFAULT ''"),
     ("story_reactions", "timestamp", "BIGINT DEFAULT 0"),
+    ("conversations", "conversation_id", "TEXT DEFAULT ''"),
     ("conversations", "user1_uid", "TEXT DEFAULT ''"),
     ("conversations", "user2_uid", "TEXT DEFAULT ''"),
     ("conversations", "last_message", "TEXT DEFAULT ''"),
     ("conversations", "last_message_time", "BIGINT DEFAULT 0"),
+    ("chat_messages", "message_id", "TEXT DEFAULT ''"),
     ("chat_messages", "conversation_id", "TEXT DEFAULT ''"),
     ("chat_messages", "sender_id", "TEXT DEFAULT ''"),
     ("chat_messages", "receiver_id", "TEXT DEFAULT ''"),
@@ -1091,6 +1108,7 @@ _POSTGRES_ADDITIVE_COLUMNS = [
     ("chat_messages", "reply_to_message_id", "TEXT DEFAULT ''"),
     ("chat_messages", "reply_to_sender_username", "TEXT DEFAULT ''"),
     ("chat_messages", "reply_to_text", "TEXT DEFAULT ''"),
+    ("groups", "group_id", "TEXT DEFAULT ''"),
     ("groups", "name", "TEXT DEFAULT ''"),
     ("groups", "description", "TEXT DEFAULT ''"),
     ("groups", "group_image", "TEXT DEFAULT ''"),
@@ -1101,8 +1119,11 @@ _POSTGRES_ADDITIVE_COLUMNS = [
     ("groups", "last_message_sender_name", "TEXT DEFAULT ''"),
     ("groups", "last_message_time", "BIGINT DEFAULT 0"),
     ("groups", "created_at", "BIGINT DEFAULT 0"),
+    ("group_members", "group_id", "TEXT DEFAULT ''"),
+    ("group_members", "uid", "TEXT DEFAULT ''"),
     ("group_members", "is_admin", "INTEGER DEFAULT 0"),
     ("group_members", "joined_at", "BIGINT DEFAULT 0"),
+    ("group_messages", "message_id", "TEXT DEFAULT ''"),
     ("group_messages", "group_id", "TEXT DEFAULT ''"),
     ("group_messages", "sender_id", "TEXT DEFAULT ''"),
     ("group_messages", "receiver_id", "TEXT DEFAULT ''"),
@@ -1120,6 +1141,7 @@ _POSTGRES_ADDITIVE_COLUMNS = [
     ("group_messages", "reply_to_message_id", "TEXT DEFAULT ''"),
     ("group_messages", "reply_to_sender_username", "TEXT DEFAULT ''"),
     ("group_messages", "reply_to_text", "TEXT DEFAULT ''"),
+    ("notifications", "notification_id", "TEXT DEFAULT ''"),
     ("notifications", "receiver_id", "TEXT DEFAULT ''"),
     ("notifications", "sender_id", "TEXT DEFAULT ''"),
     ("notifications", "sender_username", "TEXT DEFAULT ''"),
@@ -1135,6 +1157,7 @@ _POSTGRES_ADDITIVE_COLUMNS = [
     ("notifications", "timestamp", "BIGINT DEFAULT 0"),
     ("notifications", "is_read", "INTEGER DEFAULT 0"),
     ("notifications", "pushed_to_system", "INTEGER DEFAULT 0"),
+    ("blocks", "block_id", "TEXT DEFAULT ''"),
     ("blocks", "blocker_uid", "TEXT DEFAULT ''"),
     ("blocks", "blocker_username", "TEXT DEFAULT ''"),
     ("blocks", "blocked_uid", "TEXT DEFAULT ''"),
@@ -1142,6 +1165,7 @@ _POSTGRES_ADDITIVE_COLUMNS = [
     ("blocks", "blocked_display_name", "TEXT DEFAULT ''"),
     ("blocks", "blocked_profile_image", "TEXT DEFAULT ''"),
     ("blocks", "timestamp", "BIGINT DEFAULT 0"),
+    ("reports", "report_id", "TEXT DEFAULT ''"),
     ("reports", "reporter_uid", "TEXT DEFAULT ''"),
     ("reports", "reporter_username", "TEXT DEFAULT ''"),
     ("reports", "reported_uid", "TEXT DEFAULT ''"),
@@ -1152,9 +1176,55 @@ _POSTGRES_ADDITIVE_COLUMNS = [
     ("reports", "target_id", "TEXT DEFAULT ''"),
     ("reports", "timestamp", "BIGINT DEFAULT 0"),
     ("reports", "status", "TEXT DEFAULT 'pending'"),
+    ("user_presence", "uid", "TEXT DEFAULT ''"),
     ("user_presence", "is_online", "INTEGER DEFAULT 0"),
     ("user_presence", "last_seen", "BIGINT DEFAULT 0"),
 ]
+
+_LEGACY_ID_BACKFILL_TARGETS = [
+    ("users", "uid"),
+    ("posts", "post_id"),
+    ("comments", "comment_id"),
+    ("stories", "story_id"),
+    ("conversations", "conversation_id"),
+    ("chat_messages", "message_id"),
+    ("groups", "group_id"),
+    ("group_messages", "message_id"),
+    ("notifications", "notification_id"),
+    ("blocks", "block_id"),
+    ("reports", "report_id"),
+    ("user_presence", "uid"),
+]
+
+_REQUIRED_UNIQUE_INDEXES = [
+    ("idx_users_uid_unique", "users", "uid"),
+    ("idx_posts_post_id_unique", "posts", "post_id"),
+    ("idx_likes_pair_unique", "likes", "post_id, user_id"),
+    ("idx_saved_posts_pair_unique", "saved_posts", "post_id, user_id"),
+    ("idx_follows_pair_unique", "follows", "follower_uid, following_uid"),
+    ("idx_story_viewers_pair_unique", "story_viewers", "story_id, viewer_uid"),
+    ("idx_story_reactions_pair_unique", "story_reactions", "story_id, reactor_uid"),
+    ("idx_conversations_id_unique", "conversations", "conversation_id"),
+    ("idx_group_members_pair_unique", "group_members", "group_id, uid"),
+    ("idx_blocks_pair_unique", "blocks", "blocker_uid, blocked_uid"),
+    ("idx_user_presence_uid_unique", "user_presence", "uid"),
+]
+
+
+def _pg_exec_savepoint(db: Any, sql: str) -> bool:
+    db.execute("SAVEPOINT sp_mig")
+    try:
+        db.execute(sql)
+        db.execute("RELEASE SAVEPOINT sp_mig")
+        return True
+    except Exception as exc:
+        logger.debug("Optional migration statement skipped (%s): %s", sql[:80], exc)
+        try:
+            db.execute("ROLLBACK TO SAVEPOINT sp_mig")
+            db.execute("RELEASE SAVEPOINT sp_mig")
+        except Exception:
+            pass
+        return False
 
 
 def _init_postgres() -> None:
@@ -1202,6 +1272,9 @@ def _init_postgres() -> None:
         )
         raise last_exc
 
+    expected_cols_set = {(tbl, col) for tbl, col, _ in _POSTGRES_ADDITIVE_COLUMNS}
+    expected_tables_set = {tbl for tbl, _ in expected_cols_set}
+
     with get_db(write=True) as db:
         table_stmts = [s for s in _POSTGRES_SCHEMA_STATEMENTS if "CREATE TABLE" in s.upper()]
         index_stmts = [s for s in _POSTGRES_SCHEMA_STATEMENTS if "CREATE TABLE" not in s.upper()]
@@ -1209,9 +1282,13 @@ def _init_postgres() -> None:
         for stmt in table_stmts:
             db.execute(stmt)
 
-        # Ensure all additive columns exist for older PostgreSQL schemas BEFORE creating indexes on them
+        # Ensure ALL columns (including PKs/IDs) exist for legacy PostgreSQL schemas BEFORE backfilling/indexing
         col_rows = db.execute(
-            "SELECT table_name, column_name FROM information_schema.columns WHERE table_schema = current_schema()"
+            """
+            SELECT table_name, column_name, data_type, is_nullable, column_default, is_identity
+            FROM information_schema.columns
+            WHERE table_schema = current_schema()
+            """
         ).fetchall()
         existing_cols = {(r["table_name"], r["column_name"]) for r in col_rows}
         for table_name, col_name, col_def in _POSTGRES_ADDITIVE_COLUMNS:
@@ -1219,10 +1296,74 @@ def _init_postgres() -> None:
                 db.execute(f"ALTER TABLE {table_name} ADD COLUMN IF NOT EXISTS {col_name} {col_def}")
                 existing_cols.add((table_name, col_name))
 
+        # Backfill ZIQU entity ID columns from legacy `id` columns if they exist
+        for table_name, target_id_col in _LEGACY_ID_BACKFILL_TARGETS:
+            if (table_name, "id") in existing_cols:
+                _pg_exec_savepoint(
+                    db,
+                    f"UPDATE {table_name} SET {target_id_col} = id::text "
+                    f"WHERE {target_id_col} IS NULL OR {target_id_col} = ''",
+                )
+
+        if ("users", "name") in existing_cols:
+            _pg_exec_savepoint(
+                db,
+                "UPDATE users SET display_name = name WHERE display_name IS NULL OR display_name = ''",
+            )
+            _pg_exec_savepoint(
+                db,
+                "UPDATE users SET username = name WHERE username IS NULL OR username = ''",
+            )
+
+        _pg_exec_savepoint(
+            db,
+            "UPDATE users SET uid = md5(random()::text || clock_timestamp()::text) "
+            "WHERE uid IS NULL OR uid = ''",
+        )
         db.execute(
-            "UPDATE users SET username_lower = lower(COALESCE(NULLIF(username, ''), uid)) "
+            "UPDATE users SET username_lower = lower(COALESCE(NULLIF(username, ''), NULLIF(uid, ''), '')) "
             "WHERE username_lower IS NULL OR username_lower = ''"
         )
+
+        # Prevent NotNullViolation on stray legacy NOT NULL columns (such as legacy `users.id`) that ZIQU inserts omit
+        for row in col_rows:
+            tbl = row["table_name"]
+            col = row["column_name"]
+            if tbl not in expected_tables_set or (tbl, col) in expected_cols_set:
+                continue
+            if row.get("is_nullable") != "NO" or row.get("column_default") is not None or row.get("is_identity") == "YES":
+                continue
+            dtype = (row.get("data_type") or "").lower()
+            if dtype in ("integer", "bigint", "smallint"):
+                seq_name = f"{tbl}_{col}_ziqu_seq"
+                if _pg_exec_savepoint(db, f"CREATE SEQUENCE IF NOT EXISTS {seq_name}"):
+                    _pg_exec_savepoint(
+                        db,
+                        f"SELECT setval('{seq_name}', COALESCE((SELECT MAX({col})::bigint FROM {tbl}), 0) + 1, false)",
+                    )
+                    _pg_exec_savepoint(
+                        db,
+                        f"ALTER TABLE {tbl} ALTER COLUMN {col} SET DEFAULT nextval('{seq_name}')",
+                    )
+            elif dtype == "uuid":
+                _pg_exec_savepoint(db, f"ALTER TABLE {tbl} ALTER COLUMN {col} SET DEFAULT gen_random_uuid()")
+            elif dtype in ("text", "character varying", "character"):
+                _pg_exec_savepoint(
+                    db,
+                    f"ALTER TABLE {tbl} ALTER COLUMN {col} SET DEFAULT md5(random()::text || clock_timestamp()::text)",
+                )
+            elif "timestamp" in dtype:
+                _pg_exec_savepoint(db, f"ALTER TABLE {tbl} ALTER COLUMN {col} SET DEFAULT now()")
+            elif dtype == "boolean":
+                _pg_exec_savepoint(db, f"ALTER TABLE {tbl} ALTER COLUMN {col} SET DEFAULT false")
+            _pg_exec_savepoint(db, f"ALTER TABLE {tbl} ALTER COLUMN {col} DROP NOT NULL")
+
+        # Ensure unique indexes exist for ON CONFLICT targets even if tables pre-existed without constraints
+        for idx_name, tbl, cols_expr in _REQUIRED_UNIQUE_INDEXES:
+            _pg_exec_savepoint(
+                db,
+                f"CREATE UNIQUE INDEX IF NOT EXISTS {idx_name} ON {tbl}({cols_expr})",
+            )
 
         for stmt in index_stmts:
             db.execute(stmt)
@@ -1257,8 +1398,11 @@ def _init_sqlite() -> None:
                 db.execute(f"ALTER TABLE {table_name} ADD COLUMN {col_name} {sqlite_def};")
                 cols.add(col_name)
 
+        user_cols = sqlite_col_cache.get("users", set())
+        if "id" in user_cols:
+            db.execute("UPDATE users SET uid = CAST(id AS TEXT) WHERE uid IS NULL OR uid = ''")
         db.execute(
-            "UPDATE users SET username_lower = lower(COALESCE(NULLIF(username, ''), uid)) "
+            "UPDATE users SET username_lower = lower(COALESCE(NULLIF(username, ''), NULLIF(uid, ''), '')) "
             "WHERE username_lower IS NULL OR username_lower = ''"
         )
 
