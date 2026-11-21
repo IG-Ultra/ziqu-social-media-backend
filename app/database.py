@@ -1272,7 +1272,8 @@ def _init_postgres() -> None:
         )
         raise last_exc
 
-    expected_cols_set = {(tbl, col) for tbl, col, _ in _POSTGRES_ADDITIVE_COLUMNS}
+    expected_col_defs = {(tbl, col): cdef for tbl, col, cdef in _POSTGRES_ADDITIVE_COLUMNS}
+    expected_cols_set = set(expected_col_defs.keys())
     expected_tables_set = {tbl for tbl, _ in expected_cols_set}
 
     with get_db(write=True) as db:
@@ -1295,6 +1296,38 @@ def _init_postgres() -> None:
             if (table_name, col_name) not in existing_cols:
                 db.execute(f"ALTER TABLE {table_name} ADD COLUMN IF NOT EXISTS {col_name} {col_def}")
                 existing_cols.add((table_name, col_name))
+
+        # Auto-repair mismatched legacy column types (e.g. BOOLEAN->INTEGER, TIMESTAMP->BIGINT, UUID/INT->TEXT)
+        for row in col_rows:
+            tbl = row["table_name"]
+            col = row["column_name"]
+            target_def = expected_col_defs.get((tbl, col))
+            if not target_def:
+                continue
+            dtype = (row.get("data_type") or "").lower()
+            upper_def = target_def.upper()
+            if upper_def.startswith("INTEGER") and dtype == "boolean":
+                _pg_exec_savepoint(db, f"ALTER TABLE {tbl} ALTER COLUMN {col} DROP DEFAULT")
+                _pg_exec_savepoint(
+                    db,
+                    f"ALTER TABLE {tbl} ALTER COLUMN {col} TYPE INTEGER USING (CASE WHEN {col} THEN 1 ELSE 0 END)",
+                )
+                _pg_exec_savepoint(db, f"ALTER TABLE {tbl} ALTER COLUMN {col} SET DEFAULT 0")
+            elif upper_def.startswith("BIGINT") and ("timestamp" in dtype or dtype == "date"):
+                _pg_exec_savepoint(db, f"ALTER TABLE {tbl} ALTER COLUMN {col} DROP DEFAULT")
+                _pg_exec_savepoint(
+                    db,
+                    f"ALTER TABLE {tbl} ALTER COLUMN {col} TYPE BIGINT "
+                    f"USING COALESCE((EXTRACT(EPOCH FROM {col}) * 1000)::bigint, 0)",
+                )
+                _pg_exec_savepoint(db, f"ALTER TABLE {tbl} ALTER COLUMN {col} SET DEFAULT 0")
+            elif upper_def.startswith("TEXT") and dtype in ("uuid", "integer", "bigint", "smallint"):
+                _pg_exec_savepoint(db, f"ALTER TABLE {tbl} ALTER COLUMN {col} DROP DEFAULT")
+                _pg_exec_savepoint(
+                    db,
+                    f"ALTER TABLE {tbl} ALTER COLUMN {col} TYPE TEXT USING COALESCE({col}::text, '')",
+                )
+                _pg_exec_savepoint(db, f"ALTER TABLE {tbl} ALTER COLUMN {col} SET DEFAULT ''")
 
         # Backfill ZIQU entity ID columns from legacy `id` columns if they exist
         for table_name, target_id_col in _LEGACY_ID_BACKFILL_TARGETS:
@@ -1320,10 +1353,16 @@ def _init_postgres() -> None:
             "UPDATE users SET uid = md5(random()::text || clock_timestamp()::text) "
             "WHERE uid IS NULL OR uid = ''",
         )
-        db.execute(
+        if not _pg_exec_savepoint(
+            db,
             "UPDATE users SET username_lower = lower(COALESCE(NULLIF(username, ''), NULLIF(uid, ''), '')) "
-            "WHERE username_lower IS NULL OR username_lower = ''"
-        )
+            "WHERE username_lower IS NULL OR username_lower = ''",
+        ):
+            _pg_exec_savepoint(
+                db,
+                "UPDATE users SET username_lower = lower(COALESCE(NULLIF(username, ''), 'user')) || '_' || substr(uid, 1, 8) "
+                "WHERE username_lower IS NULL OR username_lower = ''",
+            )
 
         # Prevent NotNullViolation on stray legacy NOT NULL columns (such as legacy `users.id`) that ZIQU inserts omit
         for row in col_rows:
@@ -1366,10 +1405,13 @@ def _init_postgres() -> None:
             )
 
         for stmt in index_stmts:
-            db.execute(stmt)
+            _pg_exec_savepoint(db, stmt)
 
         for admin_email in settings.ADMIN_EMAIL_SET:
-            db.execute("UPDATE users SET is_admin = 1 WHERE lower(email) = ?", (admin_email,))
+            _pg_exec_savepoint(
+                db,
+                f"UPDATE users SET is_admin = 1 WHERE lower(email) = '{admin_email.replace(chr(39), chr(39)*2)}'",
+            )
 
 
 def _init_sqlite() -> None:
