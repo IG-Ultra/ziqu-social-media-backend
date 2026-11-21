@@ -1,3 +1,4 @@
+import datetime
 import json
 import math
 import re
@@ -20,6 +21,32 @@ def _safe_float(val: Any, default: float) -> float:
         return f if math.isfinite(f) else default
     except Exception:
         return default
+
+
+def _safe_int(val: Any, default: int = 0) -> int:
+    if val is None:
+        return default
+    if isinstance(val, bool):
+        return 1 if val else 0
+    if isinstance(val, int):
+        return val
+    if isinstance(val, datetime.datetime):
+        try:
+            return int(val.timestamp() * 1000)
+        except Exception:
+            return default
+    if isinstance(val, datetime.date):
+        try:
+            return int(datetime.datetime(val.year, val.month, val.day).timestamp() * 1000)
+        except Exception:
+            return default
+    try:
+        return int(val)
+    except Exception:
+        try:
+            return int(float(val))
+        except Exception:
+            return default
 
 
 def now_ms() -> int:
@@ -121,10 +148,10 @@ def row_to_user(row: sqlite3.Row, request: Optional[Request] = None) -> Dict[str
         "displayName": row["display_name"] or "",
         "bio": row["bio"] or "",
         "profileImage": resolve_url(row["profile_image"] or "", request),
-        "createdAt": int(row["created_at"] or 0),
-        "followersCount": max(0, int(row["followers_count"] or 0)),
-        "followingCount": max(0, int(row["following_count"] or 0)),
-        "postsCount": max(0, int(row["posts_count"] or 0)),
+        "createdAt": _safe_int(row["created_at"], 0),
+        "followersCount": max(0, _safe_int(row["followers_count"], 0)),
+        "followingCount": max(0, _safe_int(row["following_count"], 0)),
+        "postsCount": max(0, _safe_int(row["posts_count"], 0)),
         "isVerified": is_ver,
         "verifiedAccount": is_ver,
         "isAdmin": is_admin,
@@ -155,15 +182,15 @@ def row_to_post(row: sqlite3.Row, request: Optional[Request] = None) -> Dict[str
         "mediaType": row["media_type"] or "image",
         "caption": row["caption"] or "",
         "mood": row["mood"] or "",
-        "timestamp": int(row["timestamp"] or 0),
-        "likesCount": max(0, int(row["likes_count"] or 0)),
-        "commentsCount": max(0, int(row["comments_count"] or 0)),
-        "sharesCount": max(0, int(row["shares_count"] or 0)),
-        "savesCount": max(0, int(row["saves_count"] or 0)),
-        "watchTimeMs": max(0, int(row["watch_time_ms"] or 0)),
-        "viewsCount": max(0, int(row["views_count"] or 0)),
-        "completionsCount": max(0, int(row["completions_count"] or 0)),
-        "rewatchCount": max(0, int(row["rewatch_count"] or 0)),
+        "timestamp": _safe_int(row["timestamp"], 0),
+        "likesCount": max(0, _safe_int(row["likes_count"], 0)),
+        "commentsCount": max(0, _safe_int(row["comments_count"], 0)),
+        "sharesCount": max(0, _safe_int(row["shares_count"], 0)),
+        "savesCount": max(0, _safe_int(row["saves_count"], 0)),
+        "watchTimeMs": max(0, _safe_int(row["watch_time_ms"], 0)),
+        "viewsCount": max(0, _safe_int(row["views_count"], 0)),
+        "completionsCount": max(0, _safe_int(row["completions_count"], 0)),
+        "rewatchCount": max(0, _safe_int(row["rewatch_count"], 0)),
         "isReel": bool(row["is_reel"]),
         "isVerified": is_ver,
         "verifiedAccount": is_ver,
@@ -179,8 +206,8 @@ def row_to_comment(row: sqlite3.Row, request: Optional[Request] = None) -> Dict[
         "username": row["username"] or "",
         "userProfileImage": resolve_url(row["user_profile_image"] or "", request),
         "commentText": row["comment_text"] or "",
-        "timestamp": int(row["timestamp"] or 0),
-        "likesCount": max(0, int(row["likes_count"] or 0)),
+        "timestamp": _safe_int(row["timestamp"], 0),
+        "likesCount": max(0, _safe_int(row["likes_count"], 0)),
         "parentId": row["parent_id"] or "",
         "repliedToUserId": row["replied_to_user_id"] or "",
         "repliedToUsername": row["replied_to_username"] or "",
@@ -220,8 +247,8 @@ def row_to_story(
         "userProfileImage": resolve_url(row["user_profile_image"] or "", request),
         "mediaUrl": resolve_url(row["media_url"] or "", request),
         "mediaType": row["media_type"] or "image",
-        "timestamp": int(row["timestamp"] or 0),
-        "expiresAt": int(row["expires_at"] or 0),
+        "timestamp": _safe_int(row["timestamp"], 0),
+        "expiresAt": _safe_int(row["expires_at"], 0),
         "viewers": viewers,
         "isVerified": is_ver,
         "verifiedAccount": is_ver,
@@ -263,7 +290,7 @@ def row_to_chat_message(
         "senderProfileImage": resolve_url(row["sender_profile_image"] or "", request, base_url),
         "message": row["message"] or "",
         "mediaUrl": resolve_url(row["media_url"] or "", request, base_url),
-        "timestamp": int(row["timestamp"] or 0),
+        "timestamp": _safe_int(row["timestamp"], 0),
         "type": row["type"] or "text",
         "seen": bool(row["seen"]),
         "deleted": bool(row["deleted"]),
@@ -317,8 +344,8 @@ def build_group_dict(
         "lastMessage": row["last_message"] or "",
         "lastMessageSenderId": row["last_message_sender_id"] or "",
         "lastMessageSenderName": row["last_message_sender_name"] or "",
-        "lastMessageTime": int(row["last_message_time"] or 0),
-        "createdAt": int(row["created_at"] or 0),
+        "lastMessageTime": _safe_int(row["last_message_time"], 0),
+        "createdAt": _safe_int(row["created_at"], 0),
         "unreadCount": 0,
     }
 
@@ -378,8 +405,8 @@ def build_groups_batch(
                 "lastMessage": row["last_message"] or "",
                 "lastMessageSenderId": row["last_message_sender_id"] or "",
                 "lastMessageSenderName": row["last_message_sender_name"] or "",
-                "lastMessageTime": int(row["last_message_time"] or 0),
-                "createdAt": int(row["created_at"] or 0),
+                "lastMessageTime": _safe_int(row["last_message_time"], 0),
+                "createdAt": _safe_int(row["created_at"], 0),
                 "unreadCount": 0,
             }
         )
@@ -402,7 +429,7 @@ def row_to_notification(row: sqlite3.Row, request: Optional[Request] = None) -> 
         "conversationId": row["conversation_id"] or "",
         "groupId": row["group_id"] or "",
         "title": row["title"] or "",
-        "timestamp": int(row["timestamp"] or 0),
+        "timestamp": _safe_int(row["timestamp"], 0),
         "isRead": is_read,
         "seen": is_read,
         "pushedToSystem": bool(row["pushed_to_system"]),
